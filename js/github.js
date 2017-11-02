@@ -7,6 +7,9 @@ class GitHubSsoTranslator {
         if (this._users.hasOwnProperty(sso)) {
             return Promise.resolve(this._users[sso]);
         }
+        if (isNaN(sso)){
+            return Promise.reject();
+        }
         return PromisifyedXmlHttpRequest.get('https://github.build.ge.com/' + sso)
             .then((data) => {
                 let matchArr = data.match('<title>' + sso + '.\(.*\)<', 'ig');
@@ -25,14 +28,16 @@ class GitHubSsoTranslator {
     replaceUserSSOInATags(aTags) {
         for (let i = 0, len = aTags && aTags.length; i < len; i++) {
             const tag = aTags[i];
-            let userSSO = tag.text.trim(tag.text);
-            if (isNaN(userSSO)){
-                userSSO = userSSO.substr(1); //remove @
+            if (tag.textContent) {
+                let userSSO = tag.textContent.trim();
+                if (isNaN(userSSO)){
+                    userSSO = userSSO.substr(1); //remove @
+                }
+                this.translateUserSSO(userSSO).then((userName) => {
+                    tag.textContent = '@' + userName;
+                    tag.setAttribute('title', userSSO);
+                }, () => {});
             }
-            this.translateUserSSO(userSSO).then((userName) => {
-                tag.text = '@' + userName;
-                tag.setAttribute('title', userSSO);
-            });
         }
     }
 
@@ -61,11 +66,18 @@ const traslatePage = () => {
 
     const issue = document.querySelectorAll('.issue-meta a.tooltipped');
     translator.replaceUserSSOInATags(issue);
+
+    const openedBy = document.querySelectorAll('.issues-listing .opened-by a');
+    translator.replaceUserSSOInATags(openedBy);
+
+    const reviewer = document.querySelectorAll('.js-suggested-reviewer span');
+    translator.replaceUserSSOInATags(reviewer);
 };
 
 chrome.runtime.onMessage.addListener((request) => {
     if (request.pageUpdated) {
         traslatePage();
+        setTimeout(traslatePage, 1000); //translate again after few ajax are done
     }
 });
 traslatePage();

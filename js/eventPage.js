@@ -1,5 +1,7 @@
-chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+chrome.webNavigation.onCompleted.addListener((details) => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {pageUpdated: true});
+        if (tabs.length > 0) {
+            chrome.tabs.sendMessage(tabs[0].id, {pageUpdated: true});
+        }
     });
 });
