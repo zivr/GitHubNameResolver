@@ -25,9 +25,9 @@ class GitHubSsoTranslator {
             });
     }
 
-    replaceUserSSOInATags(aTags) {
-        for (let i = 0, len = aTags && aTags.length; i < len; i++) {
-            const tag = aTags[i];
+    replaceUserSSOInTags(tags) {
+        for (let i = 0, len = tags && tags.length; i < len; i++) {
+            const tag = tags[i];
             if (tag.textContent) {
                 let userSSO = tag.textContent.trim();
                 if (isNaN(userSSO)){
@@ -59,19 +59,26 @@ class GitHubSsoTranslator {
 const translator = new GitHubSsoTranslator();
 const traslatePage = () => {
     const authors = document.querySelectorAll('a.author');
-    translator.replaceUserSSOInATags(authors);
+    translator.replaceUserSSOInTags(authors);
 
     const mentions = document.getElementsByClassName('user-mention');
-    translator.replaceUserSSOInATags(mentions);
+    translator.replaceUserSSOInTags(mentions);
 
     const issue = document.querySelectorAll('.issue-meta a.tooltipped');
-    translator.replaceUserSSOInATags(issue);
+    translator.replaceUserSSOInTags(issue);
 
     const openedBy = document.querySelectorAll('.issues-listing .opened-by a');
-    translator.replaceUserSSOInATags(openedBy);
+    translator.replaceUserSSOInTags(openedBy);
 
-    const reviewer = document.querySelectorAll('.js-suggested-reviewer span');
-    translator.replaceUserSSOInATags(reviewer);
+    const reviewer = Array.apply(null,document.querySelectorAll('.reviewers-status-icon'))
+        .map((elem) => elem.parentElement.querySelector('.text-bold'));
+    translator.replaceUserSSOInTags(reviewer);
+
+    const assignees = document.querySelectorAll('.js-discussion-sidebar-item .assignee');
+    translator.replaceUserSSOInTags(assignees);
+
+    const discussion = document.querySelectorAll('.discussion-item-entity');
+    translator.replaceUserSSOInTags(discussion);
 };
 
 chrome.runtime.onMessage.addListener((request) => {
@@ -80,7 +87,13 @@ chrome.runtime.onMessage.addListener((request) => {
         setTimeout(traslatePage, 1000); //translate again after few ajax are done
     }
 });
+document.addEventListener("DOMNodeInserted", Utils.debounce(traslatePage, 100), false);
+
 traslatePage();
+
+
+
+
 
 
 

@@ -4,7 +4,7 @@
     "persistent": false
   },
   "content_scripts": [ {
-    "js": [ "js/lib/http.js" , "js/github.js"],
+    "js": [ "js/lib/http.js" ,"js/lib/utils.js" , "js/github.js"],
     "matches": [ "*://github.build.ge.com/*" ],
     "all_frames": true
   }],
@@ -13,5 +13,5 @@
   "name": "GE github SSO Resolver",
   "permissions": [ "tabs", "storage", "*://github.build.ge.com/*", "webNavigation"],
   "icons": { "128": "img/github-ge.png" },
-  "version": "1.0.1.1"
+  "version": "1.0.2.2"
 }

@@ -1,4 +1,3 @@
-console.log('http loaded');
 class PromisifyedXmlHttpRequest {
     static get(url) {
         return new Promise(function(resolve, reject) {
